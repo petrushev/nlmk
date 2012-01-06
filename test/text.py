@@ -3,9 +3,8 @@ from StringIO import StringIO
 from nlmk.tokenizer import tokenize, sentences_index
 from nlmk import stopwords
 
-from nlmk.text import sentence, iter_sentences, iter_tokens, iter_ngrams,\
-    collocations
-from codecs import open , EncodedFile
+from nlmk.text import sentence, iter_sentences, iter_tokens, iter_ngrams, collocations
+from codecs import open
 
 fh = open("racin.txt", 'r', 'utf-8')
 content = fh.read()

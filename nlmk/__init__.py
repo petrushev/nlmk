@@ -1,5 +1,6 @@
 
 from functools import reduce
+from operator import add
 
 def ra_unicode_read(fh, start, end):
     """Read random-access file on positions given as unicode string"""
@@ -9,7 +10,7 @@ def ra_unicode_read(fh, start, end):
     if end is None:
         content = fh.read()
     else:
-        content = reduce(unicode.__add__, (fh.read(1) for i in xrange(start, end)), u'') 
+        content = reduce(add, (fh.read(1) for i in xrange(start, end)), u'') 
     fh.seek(tmp_pos)
     return content
 

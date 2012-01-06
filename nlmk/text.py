@@ -26,8 +26,7 @@ def sentence(tx, i, sent_idx):
 def iter_sentences(tx, sent_idx):
     tx.seek(0)
     start = 0
-    for end in sent_idx:
-        
+    for end in sent_idx:        
         sent = reduce(unicode.__add__, (tx.read(1) for i in xrange(start, end)), u'')
         sent = sent.replace(u'\n',u' ').replace(u'\t',u' ').strip()
         start = end
@@ -55,15 +54,17 @@ def iter_ngrams(tokens, n=2):
             history.pop(0)
             yield ngram
             
-def collocations(bigrams):
+def default_collocation_filter(token):
+    return len(token)>2 and token not in stopwords
+            
+def collocations(bigrams, filter=default_collocation_filter):
     collocs = ((l.lower(), r.lower()) for l, r in bigrams)
-    collocs = sorted((l, r) for l, r in collocs\
-                     if len(l)>2 and len(r)>2
-                        and l not in stopwords 
-                        and r not in stopwords)
-    collocs = sorted(  ( (len(list(items)), colloc)   \
+    collocs = sorted(  (l, r) for l, r in collocs \
+                       if filter(l) and filter(r)   )
+    collocs = sorted(  ( (len(list(items)), colloc) \
                         for colloc, items in groupby(collocs)),
                      reverse=True)
+    
     return collocs
     
     

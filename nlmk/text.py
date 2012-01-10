@@ -67,5 +67,6 @@ def collocations(bigrams, filter=default_collocation_filter):
     
     return collocs
     
-    
-    
+def frequency(tokens):
+    tokens = sorted(t.lower() for t in tokens if len(t)>1)
+    return dict((token, len(tuple(items))) for token, items in groupby(tokens))

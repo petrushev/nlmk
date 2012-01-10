@@ -1,0 +1,6 @@
+Natural Language processing library for Macedonian (MK)
+
+nlmk is a small library for nlp specialized for Macedonian language,
+focusing on localization of the tokenizer and the stopwords. 
+People familiar with nltk (python) can be introduced painlessly. 
+It also has focus on working with large files (texts).

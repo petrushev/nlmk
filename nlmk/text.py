@@ -25,16 +25,24 @@ def sentence(tx, i, sent_idx):
     
 def iter_sentences(tx, sent_idx):
     tx.seek(0)
-    start = 0
-    for end in sent_idx:        
-        sent = reduce(unicode.__add__, (tx.read(1) for i in xrange(start, end)), u'')
-        sent = sent.replace(u'\n',u' ').replace(u'\t',u' ').strip()
-        start = end
-        yield sent
-        
-    ending= tx.read().replace(u'\n',u' ').replace(u'\t',u' ').strip()
-    tx.seek(0)
-    yield ending
+    buf = u''
+    sent_iter=iter(sent_idx)
+    end = sent_iter.next()
+    len_ = end
+    for line in tx:  # read through file and do sentence segmentation
+        buf = buf + line
+        while len(buf)>=len_:  # buffer larger than wanted sentence -> sentence found!
+            part = buf[:len_]  
+            yield part.replace(u'\n',u' ').replace(u'\t',u' ').strip()  # yield sentence
+            buf = buf[len_:]   # cutoff the buffer
+            try:
+                new_end = sent_iter.next()  # get the end and lenght of next sentence
+                len_ = new_end - end
+                end = new_end
+            except StopIteration: # all sentences yielded, finish off the text
+                buf = buf + tx.read()
+                yield buf.replace(u'\n',u' ').replace(u'\t',u' ').strip() 
+    
     
     
 def iter_tokens(sentences):

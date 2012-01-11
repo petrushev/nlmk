@@ -7,6 +7,8 @@ from nlmk.tokenizer import tokenize
 from nlmk import stopwords
 stopwords = stopwords()
 
+key0=lambda item:item[0]
+
 def sentence(tx, i, sent_idx):
     """Returns i-th sentence from tx (file-like text feed), given sentence index"""
     if i > len(sent_idx):
@@ -62,19 +64,48 @@ def iter_ngrams(tokens, n=2):
             history.pop(0)
             yield ngram
             
+            
 def default_collocation_filter(token):
+    """For use in `collocations`, drops letters, punctuation and stopwords"""
     return len(token)>2 and token not in stopwords
             
+
 def collocations(bigrams, filter=default_collocation_filter):
+    # lower and filter
     collocs = ((l.lower(), r.lower()) for l, r in bigrams)
     collocs = sorted(  (l, r) for l, r in collocs \
                        if filter(l) and filter(r)   )
+    # count and sort
     collocs = sorted(  ( (len(list(items)), colloc) \
-                        for colloc, items in groupby(collocs)),
-                     reverse=True)
+                         for colloc, items in groupby(collocs)),
+                     key=key0)
+             
+    total_collocs = sum(item[0] for item in collocs) 
     
-    return collocs
+    # group by freq
+    threshold_percent = 0
+    for cnt, items in groupby(collocs, key=key0):
+        len_=len(list(items))
+        threshold_percent = threshold_percent + cnt*len_*1.0/total_collocs
+        if threshold_percent<0.97:   # rise threshold
+            threshold = cnt
+        if threshold_percent > 0.3:  # enough cutting
+            break
+        
+    if threshold==0: threshold=1  # cut simple bigrams anyway
+    
+    return sorted(item for cnt, item in collocs if cnt> threshold)
+
     
 def frequency(tokens):
     tokens = sorted(t.lower() for t in tokens if len(t)>1)
     return dict((token, len(tuple(items))) for token, items in groupby(tokens))
+
+def concordance(word, tokens, window=4):
+    """Goes through a tokens sequence to find occurences of a word and iterates it in a window"""
+    word=word.lower()
+    for window_tokens in iter_ngrams(tokens, window*2+1):
+        if window_tokens[window].lower()==word:
+            yield window_tokens
+            
+    

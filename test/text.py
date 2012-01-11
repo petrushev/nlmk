@@ -1,11 +1,14 @@
+# -*- coding: utf-8 -*-
 
 from StringIO import StringIO
+from time import time
+
 from nlmk.tokenizer import tokenize, sentences_index
-from nlmk import stopwords
+from nlmk import stopwords, ra_unicode_read
 stopwords = stopwords()
 
 from nlmk.text import sentence, iter_sentences, iter_tokens,\
-                      iter_ngrams, collocations, frequency
+                      iter_ngrams, collocations, frequency, concordance
 from codecs import open
 
 #fh = open("racin.txt", 'r', 'utf-8')
@@ -21,17 +24,24 @@ isents = iter_sentences(fh, sent_idx)
 
 itokens = (t for t, s, tid in iter_tokens(isents))
 
+
 ibig = iter_ngrams(itokens, n=2) 
 #for s in    stopwords():
 #    print s
 
-#col = collocations(ibig)
-#for l, r in col:
-#    print ' '.join(r), l
-fq =  frequency(itokens)
-fq = ((t, c) for t, c in fq.iteritems() \
-      if c>4 and t not in stopwords)
-for t, c in sorted(fq, key=lambda item:-1*item[1]):
-    print t,c
+col = collocations(ibig)
+for l, r in col:
+    print l,r
+
+
+
+#t0=time()
+#fq =  frequency(itokens)
+#print time()-t0
+
+#fq = ((t, c) for t, c in fq.iteritems() \
+#      if c>4 and t not in stopwords)
+#for t, c in sorted(fq, key=lambda item:-1*item[1]):
+#    print t,c
 
 fh.close()

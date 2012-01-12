@@ -1,5 +1,5 @@
 
-from itertools import groupby
+from itertools import groupby, tee
 
 from nlmk import ra_unicode_read
 from nlmk.tokenizer import tokenize
@@ -71,6 +71,7 @@ def default_collocation_filter(token):
             
 
 def collocations(bigrams, filter=default_collocation_filter):
+    """Returns sorted list of common bigrams""" 
     # lower and filter
     collocs = ((l.lower(), r.lower()) for l, r in bigrams)
     collocs = sorted(  (l, r) for l, r in collocs \
@@ -98,14 +99,58 @@ def collocations(bigrams, filter=default_collocation_filter):
 
     
 def frequency(tokens):
+    """Return dictionary of frequencies per token"""
     tokens = sorted(t.lower() for t in tokens if len(t)>1)
-    return dict((token, len(tuple(items))) for token, items in groupby(tokens))
+    return dict( (token, len(tuple(items))) \
+                 for token, items in groupby(tokens) )
 
 def concordance(word, tokens, window=4):
     """Goes through a tokens sequence to find occurences of a word and iterates it in a window"""
     word=word.lower()
     for window_tokens in iter_ngrams(tokens, window*2+1):
+        # the word is in the middle of window
         if window_tokens[window].lower()==word:
             yield window_tokens
+
+def vocabulary(token_triplets):
+    """Vocabulary, each word contains list of pairs (sent_id, token_id)"""
+    vocab = {}
+    for token, sent_id, token_id in token_triplets:
+        if len(token)==1: continue
+        token=token.lower()
+        pair = (sent_id, token_id)
+        try:
+            vocab[token].append(pair)
+        except KeyError:
+            vocab[token]=[pair]
             
+    return vocab
     
+def contexts(word, tokens):
+    """Iterate contexts for a given word"""
+    word=word.lower()
+    wrappers=set([])
+    for item in iter_ngrams(tokens, 3):
+        item=[i.lower() for i in item] 
+        if item[1]!=word: continue  # have a match in the middle
+        if any([len(t)<2 for t in item]): continue  # punctuation
+        wrappers.add((item[0], item[2]))
+    return wrappers
+    
+
+def similar(word, tokens):
+    """Find words in similar contexts"""
+    word=word.lower()
+    it1, it2 = tee(iter(tokens)) #copy iterators 
+    contexts_=contexts(word, it1)
+    sims=set([])
+    for item in iter_ngrams(it2, 3):
+        item=[i.lower() for i in item] 
+        if item[1]==word: continue
+        if any([len(t)<2 for t in item]): continue  # punctuation
+        for l, r in contexts_:
+            if l==item[0] and r==item[2]:
+                sims.add(item[1])
+                
+    return sims
+

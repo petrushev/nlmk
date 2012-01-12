@@ -63,5 +63,5 @@ def sentences_index(feed):
     end = oneOf(list(u'\n'+u'-—"„“”'+alpha_cap_uni))
     parser = start+end
     parser = parser.parseWithTabs()
-    return [s+1 for t,s,e in parser.scanString(feed)]
+    return [item[1]+1 for item in parser.scanString(feed)]
 

@@ -1,5 +1,6 @@
 
 from itertools import groupby, tee
+from operator import itemgetter
 
 from nlmk import ra_unicode_read
 from nlmk.tokenizer import tokenize
@@ -7,7 +8,8 @@ from nlmk.tokenizer import tokenize
 from nlmk import stopwords
 stopwords = stopwords()
 
-key0=lambda item:item[0]
+
+key0=itemgetter(0)
 
 def sentence(tx, i, sent_idx):
     """Returns i-th sentence from tx (file-like text feed), given sentence index"""
@@ -26,6 +28,7 @@ def sentence(tx, i, sent_idx):
     
     
 def iter_sentences(tx, sent_idx):
+    """Iterates through sentences of a text previously segmented"""
     tx.seek(0)
     buf = u''
     sent_iter=iter(sent_idx)
@@ -98,14 +101,23 @@ def collocations(bigrams, filter=default_collocation_filter):
     return sorted(item for cnt, item in collocs if cnt> threshold)
 
     
-def frequency(tokens):
-    """Return dictionary of frequencies per token"""
-    tokens = sorted(t.lower() for t in tokens if len(t)>1)
+def frequency(tokens, no_stopwords=True):
+    """Return dictionary of frequencies per token,
+    exclude stopwords by default"""
+    def filter_(token):
+        expr = (len(token)>1)
+        if no_stopwords:
+            expr = (expr and (token.lower() not in stopwords))
+        return expr
+    
+    tokens = sorted(t.lower() for t in tokens \
+                    if filter_(t))
     return dict( (token, len(tuple(items))) \
                  for token, items in groupby(tokens) )
 
 def concordance(word, tokens, window=4):
-    """Goes through a tokens sequence to find occurences of a word and iterates it in a window"""
+    """Goes through a tokens sequence to find 
+    occurences of a word and iterates it in a window"""
     word=word.lower()
     for window_tokens in iter_ngrams(tokens, window*2+1):
         # the word is in the middle of window

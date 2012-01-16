@@ -26,7 +26,7 @@ apos_word2 = Combine(word+Literal('\'')+word)
 
 new_line = Literal('\n')
 tab = Literal('\t')
-punkt = map(Literal, list(u"‘’.,;„“”()‘:\"\'`′!?-–—"))
+punkt = map(Literal, list(u"‘’.,;„“”()‘:\"\'`′!?-–—…"))
 punkt.append(Literal("..."))
 
 all = [word, initial, bullet, hypen_word,  apos_word1, apos_word2,\
@@ -59,7 +59,7 @@ def tokenize(feed, include_junk=True, echo_junk=False):
 
 def sentences_index(feed):
     """Returns list of sentence beginings starting from second sentence"""
-    start = oneOf(list(u'.?!'))
+    start = oneOf(list(u'.?!…'))|Literal('...')
     end = oneOf(list(u'\n'+u'-—"„“”'+alpha_cap_uni))
     parser = start+end
     parser = parser.parseWithTabs()

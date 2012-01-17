@@ -11,7 +11,7 @@ from nlmk.text import sentence, iter_sentences, iter_tokens,\
                       iter_ngrams, collocations, frequency, concordance,\
                       default_collocation_filter
 
-from nlmk.tagger import _exact, _ext
+from nlmk.tagger import tag
 
 from codecs import open
 
@@ -22,7 +22,7 @@ content = fh.read()
 fh.seek(0)
 
 sent_idx = sentences_index(content)
-del content
+#del content
 
 isents = iter_sentences(fh, sent_idx)
 
@@ -46,18 +46,17 @@ def alpha_col_filter(word):
 #for t, c in sorted(fq, key=lambda item:-1*item[1]):
 #    print t
 
+#content = ra_unicode_read(fh, 0, 15000)
+
 all_ = 0
 tagged = {}
-for t in itokens:
+for t in tokenize(content):
     all_=all_+1
-    for key, val in _ext.iteritems():
-        if t.endswith(key): 
-            tagged[val]=tagged.get(val,0)+1
-        
-    for key, values in _exact.iteritems():
-        for val in values:
-            if t==val:
-                tagged[key]=tagged.get(key,0)+1
+    tag_=tag(t)
+    if tag_ :
+        tagged[tag_]=tagged.get(tag_,0)+1
+    if t.endswith(u'дил'):
+        print t
 
 print tagged
 print sum(tagged.itervalues())*100/all_

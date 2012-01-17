@@ -10,6 +10,9 @@ stopwords = stopwords()
 from nlmk.text import sentence, iter_sentences, iter_tokens,\
                       iter_ngrams, collocations, frequency, concordance,\
                       default_collocation_filter
+
+from nlmk.tagger import _exact, _ext
+
 from codecs import open
 
 #fh = open("racin.txt", 'r', 'utf-8')
@@ -36,11 +39,27 @@ def alpha_col_filter(word):
 
 
 
-fq =  frequency(itokens)
+#fq =  frequency(itokens)
 
-fq = ((t, c) for t, c in fq.iteritems() \
-      if c>4)
-for t, c in sorted(fq, key=lambda item:-1*item[1]):
-    print t
+#fq = ((t, c) for t, c in fq.iteritems() \
+#      if c>4)
+#for t, c in sorted(fq, key=lambda item:-1*item[1]):
+#    print t
+
+all_ = 0
+tagged = {}
+for t in itokens:
+    all_=all_+1
+    for key, val in _ext.iteritems():
+        if t.endswith(key): 
+            tagged[val]=tagged.get(val,0)+1
+        
+    for key, values in _exact.iteritems():
+        for val in values:
+            if t==val:
+                tagged[key]=tagged.get(key,0)+1
+
+print tagged
+print sum(tagged.itervalues())*100/all_
 
 fh.close()

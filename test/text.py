@@ -2,6 +2,8 @@
 
 from StringIO import StringIO
 from time import time
+from itertools import tee
+from pprint import pprint
 
 from nlmk.tokenizer import tokenize, sentences_index
 from nlmk import stopwords, ra_unicode_read
@@ -11,7 +13,7 @@ from nlmk.text import sentence, iter_sentences, iter_tokens,\
                       iter_ngrams, collocations, frequency, concordance,\
                       default_collocation_filter
 
-from nlmk.tagger import tag
+from nlmk.tagger import iter_tagged, _base_tags, tag
 
 from codecs import open
 
@@ -49,25 +51,43 @@ def alpha_col_filter(word):
 #content = ra_unicode_read(fh, 0, 15000)
 
 tokens = tokenize(content)
+itagged1 = ((token, _base_tags.get(tag(token),None)) for token in tokens)
+
+itagged1, itagged2 = tee(itagged1)
 
 all_ = 0
 tagged = {}
-for t in tokens:
+for token, tag in itagged1:
     all_=all_+1
-    tag_=tag(t)
-    if tag_ :
-        tagged[tag_]=tagged.get(tag_,0)+1
+    if tag :
+        tagged[tag]=tagged.get(tag,0)+1
 #    if t.endswith(u'ам'):
 #        print t
 
-for l,c,r in iter_ngrams(tokens,3):
-    ltag, ctag, rtag = tag(l), tag(c), tag(r)
+llx ={}
+lxr ={}
+
+for l,c,r in iter_ngrams(itagged2,3):
+    (l, ltag), (c, ctag), (r, rtag)=l,c,r
     if ltag and ltag!='PU' and rtag and rtag!='PU'\
        and ctag and ctag!='PU':
-        print l,c,r,'',ltag,ctag,rtag  
+        print l,c,r,'',ltag,ctag,rtag
+        try:
+            llx[(ltag,ctag)].add(rtag)
+        except KeyError:
+            llx[(ltag,ctag)]=set([rtag])
+        try:
+            lxr[(ltag,rtag)].add(ctag)
+        except KeyError:
+            lxr[(ltag,rtag)]=set([ctag])
+              
 
 
 print tagged
 print sum(tagged.itervalues())*100/all_
+
+pprint(llx)
+pprint(lxr)
+       
 
 fh.close()

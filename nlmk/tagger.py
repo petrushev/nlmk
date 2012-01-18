@@ -23,10 +23,10 @@ _ext = {
   u'ање':'GI',    # глаголска именка
   u'дачи':'IM',
   u'цачи':'IM',
-  u'ција':'F',     # именка женски род
-  u'цијата':'FC', # именка женски род, член
-  u'ции':'FP',     # именка женски род, множина
-  u'циите':'FPC'   # именка женски род, множина, член
+  u'ција':'IF',     # именка женски род
+  u'цијата':'IFC', # именка женски род, член
+  u'ции':'IFP',     # именка женски род, множина
+  u'циите':'IFPC'   # именка женски род, множина, член
   
   #u'ици':'I' # именка
 }
@@ -57,7 +57,26 @@ _exact = {
           
 }
 
+_base_tags = {
+  'GP':   'PL',
+  'NSV':  'G',
+  'NSVL': 'G',
+  'GL':   'G',
+  'GP3':  'G',
+  'PRMC': 'PR',
+  'PRP':  'PR',
+  'GI':   'I',
+  'IM':   'I',
+  'IF':   'I',
+  'IFC':  'I',
+  'IFP':  'I',
+  'IFPC': 'I',
+  'ZL':   'Z'
+}
+
+
 def tag(token):
+    """Returns guessed tag for a token, returns None if fails to tag"""
     for tag_, vals in _exact.iteritems():
         if token in vals:
             return tag_
@@ -67,3 +86,11 @@ def tag(token):
     
     return None
 
+
+def iter_tagged(tokens):
+    """Iterates pairs token, tag for a sequence of tokens"""
+    for t in tokens:
+        yield t, tag(t) 
+
+
+#def base_token():

@@ -19,16 +19,16 @@ from codecs import open
 #fh = open("nebeska.txt", 'r', 'utf-8')
 fh = open("lek_protiv_melanholijata.txt", 'r', 'utf-8')
 content = fh.read()
-fh.seek(0)
 
-sent_idx = sentences_index(content)
+#fh.seek(0)
+#sent_idx = sentences_index(content)
 #del content
 
-isents = iter_sentences(fh, sent_idx)
+#isents = iter_sentences(fh, sent_idx)
 
-itokens = (t for t, s, tid in iter_tokens(isents))
+#itokens = (t for t, s, tid in iter_tokens(isents))
 
-ibig = iter_ngrams(itokens, n=2) 
+#ibig = iter_ngrams(itokens, n=2) 
 
 def alpha_col_filter(word):
     return word > u'a' and word< u'џџ' and default_collocation_filter(word) 
@@ -48,15 +48,24 @@ def alpha_col_filter(word):
 
 #content = ra_unicode_read(fh, 0, 15000)
 
+tokens = tokenize(content)
+
 all_ = 0
 tagged = {}
-for t in tokenize(content):
+for t in tokens:
     all_=all_+1
     tag_=tag(t)
     if tag_ :
         tagged[tag_]=tagged.get(tag_,0)+1
-    if t.endswith(u'дил'):
-        print t
+#    if t.endswith(u'ам'):
+#        print t
+
+for l,c,r in iter_ngrams(tokens,3):
+    ltag, ctag, rtag = tag(l), tag(c), tag(r)
+    if ltag and ltag!='PU' and rtag and rtag!='PU'\
+       and ctag and ctag!='PU':
+        print l,c,r,'',ltag,ctag,rtag  
+
 
 print tagged
 print sum(tagged.itervalues())*100/all_

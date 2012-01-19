@@ -97,4 +97,3 @@ def iter_tagged(tokens):
 
 
 base_tag = lambda tag: _base_tags.get(tag, tag)
-    

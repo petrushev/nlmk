@@ -13,7 +13,7 @@ from nlmk.text import sentence, iter_sentences, iter_tokens,\
                       iter_ngrams, collocations, frequency, concordance,\
                       default_collocation_filter
 
-from nlmk.tagger import iter_tagged, _base_tags, tag
+from nlmk.tagger import base_tag, tag
 
 from codecs import open
 
@@ -60,13 +60,13 @@ itagged1, itagged2 = tee(itagged1)
 
 all_ = 0
 tagged = {}
-<<<<<<< HEAD
+
 for token, tag_ in itagged1:
     all_=all_+1
     if tag_ :
         tagged[tag_]=tagged.get(tag_,0)+1
-#    if t.endswith(u'ам'):
-#        print t
+#    if token.endswith(u'ината') :
+#        print token, tag_
 
 #llx ={}
 lxr ={}
@@ -98,12 +98,11 @@ for (l, ltag), (c,ctag), (r,rtag) in tagged_trigrams:
     if ltag and rtag and ltag!='PU' and rtag!='PU' and ctag is None:
         for ltag_, ctag_, rtag_ in valid:
             if ltag==ltag_ and rtag==rtag_:
-                pass
-                #print c, ctag_
+                print c, ctag_
 
 
-pprint(llx)
+"""
 pprint(lxr)
        
+"""
 
-fh.close()

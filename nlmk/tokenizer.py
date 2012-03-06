@@ -26,8 +26,8 @@ apos_word2 = Combine(word+Literal('\'')+word)
 
 new_line = Literal('\n')
 tab = Literal('\t')
-punkt = map(Literal, list(u"‘’.,;„“”()‘:\"\'`′!?-–—…"))
-punkt.append(Literal("..."))
+punctuation = list(u"‘’.,;„“”()‘:\"\'`′!?-–—…")+['...']
+punkt = map(Literal, punctuation)
 
 all = [word, initial, bullet, hypen_word,  apos_word1, apos_word2,\
           number, percent, new_line, latin_word, tab]

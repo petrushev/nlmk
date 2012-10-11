@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from pyparsing import Suppress, Word, Optional, Literal, originalTextFor,\
-                      OneOrMore, nums, ParseException, Or, Combine, alphas,\
+from pyparsing import Word, Literal, originalTextFor,\
+                      OneOrMore, nums, Or, Combine, alphas,\
                       oneOf
 
 def someOf(*argv):
@@ -9,7 +9,7 @@ def someOf(*argv):
 
 
 alpha_cap_uni = u"АБВГДЃЕЖЗЅИЈКЛЉМНЊОПРСТЌУФХЦЧЏШ"
-alpha_lower_uni = u"абвгдѓежзѕијклљмнњопрстќуфхцчџшáèѐôѝ"
+alpha_lower_uni = u"абвгдѓежзѕијклљмнњопрстќуфхцчџшáèéѐôѝ"
 alpha_uni = alpha_lower_uni + alpha_cap_uni
 
 word = Word(alpha_uni)
@@ -29,17 +29,17 @@ tab = Literal('\t')
 punctuation = list(u"‘’.,;„“”()‘:\"\'`′!?-–—…")+['...']
 punkt = map(Literal, punctuation)
 
-all = [word, initial, bullet, hypen_word,  apos_word1, apos_word2,\
+all_ = [word, initial, bullet, hypen_word,  apos_word1, apos_word2,\
           number, percent, new_line, latin_word, tab]
-all.extend(punkt)
-all = Or(all).parseWithTabs()
+all_.extend(punkt)
+all_ = Or(all_).parseWithTabs()
 
            
 def tokenize(feed, include_junk=True, echo_junk=False):
     """Returns list of tokens"""
     tokens=[]
     start=0
-    for t,s,e in all.scanString(feed):
+    for t,s,e in all_.scanString(feed):
         if s!=0:
             junk = feed[start:s].strip()
             if junk!="":

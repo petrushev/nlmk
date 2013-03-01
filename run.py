@@ -111,7 +111,6 @@ def sentences(source, slice_ = None):
 
 
 def concordance(source, word, window = 4):
-    # TODO : implement iter_tokenize
     try:
         fh = codecs.open(source, 'r', 'utf-8')
     except Exception:
@@ -119,9 +118,10 @@ def concordance(source, word, window = 4):
         return
 
     word = word.decode('utf-8')
+    window = int(window)
 
     itokens = tokenizer.iter_tokenize(fh)
-    for window in text.concordance(word, itokens, window = 4):
+    for window in text.concordance(word, itokens, window):
         print ' '.join(window).encode('utf-8')
     fh.close()
 

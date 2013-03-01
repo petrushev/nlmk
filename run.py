@@ -5,17 +5,11 @@ import codecs
 from nlmk import text
 from nlmk import tokenizer
 
-def ngramgen(source, target, *cuttoff_info):
+def ngramgen(source, *cuttoff_info):
     """Generate n-grams with provided cuttoff"""
 
     try:
         fh = codecs.open(source, 'r', 'utf-8')
-    except Exception:
-        raise
-        return
-
-    try:
-        fh2 = codecs.open(target, 'w', 'utf-8')
     except Exception:
         raise
         return
@@ -48,9 +42,7 @@ def ngramgen(source, target, *cuttoff_info):
 
     for dict_ in res:
         for tpl, v in dict_.iteritems():
-            fh2.write(' '.join(tpl) + ' ' + str(v) + '\n')
-
-    fh2.close()
+            print (' '.join(tpl) + ' ' + unicode(v)).encode('utf-8')
 
 
 _runners = {'ngramgen': ngramgen}

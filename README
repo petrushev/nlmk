@@ -15,8 +15,8 @@ N-gram extraction from texts:
     Use the nlmk.ngramgen module, or call it through the run.py caller.
 
     Example:
-    python run.py ngramgen corpus/racin.txt my_result 10 2 1
-    This will generate output file with unigrams, bigrams and trigrams:
+    python run.py ngramgen corpus/racin.txt 10 2 1
+    This will generate unigrams, bigrams and trigrams:
     - the unigrams (words) show up at least 10 times
     - the bigrams occur at least 2 times
     - the trigrams occur at least 1 time (all trigrams)

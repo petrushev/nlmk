@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-_stopwords = u"""
+_stopwords = set(u"""
 беше
 еден
 едно
@@ -173,5 +173,4 @@ a
 мора
 оди
 еј
-""".strip().split('\n')
-
+""".strip().split('\n'))

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from sys import argv
 from os.path import dirname, abspath
 import codecs
@@ -106,9 +107,26 @@ def sentences(source, slice_ = None):
             l, r = 0, total_sents
 
     for i in range(l, r):
-        print text.sentence(fh, i, sent_idx)
+        print text.sentence(fh, i, sent_idx).encode('utf-8')
 
-_runners = {'ngramgen': ngramgen, 'sentences': sentences}
+
+def concordance(source, word, window = 4):
+    # TODO : implement iter_tokenize
+    try:
+        fh = codecs.open(source, 'r', 'utf-8')
+    except Exception:
+        print 'File not found or invalid utf-8:', source
+        return
+
+    word = word.decode('utf-8')
+
+    itokens = tokenizer.iter_tokenize(fh)
+    for window in text.concordance(word, itokens, window = 4):
+        print ' '.join(window).encode('utf-8')
+    fh.close()
+
+
+_runners = {'ngramgen': ngramgen, 'sentences': sentences, 'concordance': concordance}
 
 def main():
     try:

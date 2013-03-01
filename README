@@ -9,6 +9,20 @@ Requirements:
     nlmk requires the following third party libraries:
     - pyparsing
 
+Fetch sentences:
+
+    Examples:
+    python run.py sentences corpus/racin.txt 7
+    python run.py sentences corpus/racin.txt :2
+    python run.py sentences corpus/racin.txt 3:10
+    python run.py sentences corpus/racin.txt 80:
+
+Concordance:
+
+    Display a word occuring in a fixed-length window (default: 9):
+    python run.py concordance corpus/racin.txt филозофија
+    python run.py concordance corpus/racin.txt филозофија 2
+
 
 N-gram extraction from texts:
 

@@ -42,7 +42,7 @@ def ngramgen(source, *cuttoff_info):
     try:
         fh = codecs.open(source, 'r', 'utf-8')
     except Exception:
-        raise
+        print 'File not found or invalid utf-8:', source
         return
 
     try:
@@ -70,8 +70,45 @@ def ngramgen(source, *cuttoff_info):
         for tpl, v in dict_.iteritems():
             print (' '.join(tpl) + ' ' + unicode(v)).encode('utf-8')
 
+def sentences(source, slice_ = None):
+    try:
+        fh = codecs.open(source, 'r', 'utf-8')
+    except Exception:
+        print 'File not found or invalid utf-8:', source
+        return
 
-_runners = {'ngramgen': ngramgen}
+    sent_idx = _cached_sentences_index(source)
+    total_sents = len(sent_idx) + 1
+
+    if slice_ == None:
+        l, r = 0, total_sents
+    else:
+        slice_ = [s.strip() for s in slice_.split(':')]
+        if len(slice_) > 2:
+            print 'Invalid slice:', ':'.join(slice)
+            return
+        if len(slice_) == 2:
+            l, r = slice_
+            if l == '' and r == '':
+                l, r = 0, total_sents
+            elif l == '':
+                l = 0
+                r = min(int(r), total_sents)
+            elif r == '':
+                l = int(l)
+                r = total_sents
+            else:
+                l, r = int(l), min(int(r), total_sents)
+        elif len(slice_) == 1:
+            l = int(slice[0])
+            r = min(l + 1, total_sents)
+        else:
+            l, r = 0, total_sents
+
+    for i in range(l, r):
+        print text.sentence(fh, i, sent_idx)
+
+_runners = {'ngramgen': ngramgen, 'sentences': sentences}
 
 def main():
     try:

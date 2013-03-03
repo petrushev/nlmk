@@ -136,20 +136,36 @@ def vocabulary(token_triplets):
 
     return vocab
 
-def contexts(word, tokens):
+def _vocabulary_idx_look(vocabulary, sent_id, token_id):
+    """Reverse lookup in a vocabulary, returns word at index: `sent_id`, `token_id`"""
+    for word, positions in vocabulary.iteritems():
+        for sent_id_, token_id_ in positions:
+            if sent_id_ == sent_id and token_id_ == token_id:
+                return word
+    raise IndexError, 'position not in vocabulary'
+
+
+def contexts(word, vocabulary):
     """Iterate contexts for a given word"""
     word = word.lower()
-    wrappers = set([])
-    for item in iter_ngrams(tokens, 3):
-        item = [i.lower() for i in item]
-        if item[1] != word: continue  # have a match in the middle
-        if any([len(t) < 2 for t in item]): continue  # punctuation
-        wrappers.add((item[0], item[2]))
+    positions = vocabulary.get(word, [])
+    wrappers = set()
+    for sent_id, token_id in positions:
+        if token_id == 0: continue # beginning of sentence
+        try:
+            l = _vocabulary_idx_look(vocabulary, sent_id, token_id - 1)
+            r = _vocabulary_idx_look(vocabulary, sent_id, token_id + 1)
+        except IndexError:
+            pass
+        else:
+            wrappers.add((l, r))
     return wrappers
 
+# TODO : broken
+"""Find words in similar contexts"""
+"""
 
 def similar(word, tokens):
-    """Find words in similar contexts"""
     word = word.lower()
     it1, it2 = tee(iter(tokens)) #copy iterators
     contexts_ = contexts(word, it1)
@@ -164,3 +180,4 @@ def similar(word, tokens):
 
     return sims
 
+"""

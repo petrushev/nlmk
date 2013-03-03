@@ -5,6 +5,8 @@ import codecs
 from hashlib import md5
 from struct import pack, unpack, calcsize
 
+import json
+from zlib import compress, decompress
 from nlmk import text
 from nlmk import tokenizer
 from nlmk import ngramgen as ngramgenmod
@@ -34,7 +36,25 @@ def _cached_sentences_index(filepath):
             buf = f.read(size)
             if len(buf) < size: break
             sent_idx.append(unpack('I', buf)[0])
+        f.close()
     return sent_idx
+
+def _cached_vocab(filepath):
+    sig = _cache_sig(filepath)
+    try:
+        with open('%s/%s.vocab' % (_CACHE, sig), 'rb') as f:
+            vocab_bin = f.read()
+    except IOError:
+        sent_idx = _cached_sentences_index(filepath)
+        with codecs.open(filepath, 'r', 'utf-8') as fh:
+            vocab = text.vocabulary(text.iter_tokens(text.iter_sentences(fh, sent_idx)))
+        vocab_bin = compress(json.dumps(vocab))
+        with open('%s/%s.vocab' % (_CACHE, sig), 'wb') as f:
+            f.write(vocab_bin)
+    else:
+        vocab = json.loads(decompress(vocab_bin))
+
+    return vocab
 
 
 def ngramgen(source, *cuttoff_info):
@@ -86,7 +106,7 @@ def sentences(source, slice_ = None):
     else:
         slice_ = [s.strip() for s in slice_.split(':')]
         if len(slice_) > 2:
-            print 'Invalid slice:', ':'.join(slice)
+            print 'Invalid slice:', ':'.join(slice_)
             return
         if len(slice_) == 2:
             l, r = slice_
@@ -101,7 +121,7 @@ def sentences(source, slice_ = None):
             else:
                 l, r = int(l), min(int(r), total_sents)
         elif len(slice_) == 1:
-            l = int(slice[0])
+            l = int(slice_[0])
             r = min(l + 1, total_sents)
         else:
             l, r = 0, total_sents
@@ -109,6 +129,7 @@ def sentences(source, slice_ = None):
     for i in range(l, r):
         print text.sentence(fh, i, sent_idx).encode('utf-8')
 
+    fh.close()
 
 def concordance(source, word, window = 4):
     try:
@@ -125,8 +146,22 @@ def concordance(source, word, window = 4):
         print ' '.join(window).encode('utf-8')
     fh.close()
 
+def contexts(source, word):
+    try:
+        fh = codecs.open(source, 'r', 'utf-8')
+    except Exception:
+        print 'File not found or invalid utf-8:', source
+        return
 
-_runners = {'ngramgen': ngramgen, 'sentences': sentences, 'concordance': concordance}
+    fh.close()
+
+    word = word.decode('utf-8')
+    vocab = _cached_vocab(source)
+    ctx = sorted(l + ' ' + r for l, r in text.contexts(word, vocab))
+    for c in ctx: print c.encode('utf-8')
+
+_runners = {'ngramgen': ngramgen, 'sentences': sentences, 'concordance': concordance,
+            'contexts': contexts}
 
 def main():
     try:
@@ -150,5 +185,4 @@ def main():
 
 
 if __name__ == '__main__':
-    #print _cached_sentences_index('corpus/racin.txt')
     main()

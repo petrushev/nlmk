@@ -19,10 +19,11 @@ Fetch sentences:
 
 Concordance:
 
-    Display a word occuring in a fixed-length window (default: 9):
+    Display a word occuring in a fixed-length window (default: 9)
+
+    Examples:
     python run.py concordance corpus/racin.txt филозофија
     python run.py concordance corpus/racin.txt филозофија 2
-
 
 N-gram extraction from texts:
 

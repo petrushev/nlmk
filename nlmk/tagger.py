@@ -142,3 +142,58 @@ def build_tagger(tokens):
             tagger['R'][(lt, mt)].append(rt)
 
     return tagger
+
+key1 = itemgetter(1)
+
+def smart_tag(tokens, tagger):
+    """Tag a token stream using a pre-built tagger"""
+    tr1, tr2, tr3 = tee(iter_ngrams(tokens, 3), 3)
+
+    next(tr2)
+    next(tr3)
+    next(tr3)
+
+    for token, m3, r3 in tr3:
+        l1, m1, _ = next(tr1)
+        l2, __, r2 = next(tr2)
+        tag_ = tag(token)
+        if tag_ is not None:
+            yield token, tag_
+            continue
+
+        dist_ = {}
+
+        rtags = tagger['R'][(tag(l1), tag(m1))]
+        part_ = len(rtags)
+        if part_:
+            part_ = 200000 / part_
+            for t_ in rtags:
+                dist_[t_] = dist_.get(t_, 0) + part_
+
+        rtags = tagger['M'][(tag(l2), tag(r2))]
+        part_ = len(rtags)
+        if part_:
+            part_ = 600000 / part_
+            for t_ in rtags:
+                dist_[t_] = dist_.get(t_, 0) + part_
+
+        rtags = tagger['L'][(tag(m3), tag(r3))]
+        part_ = len(rtags)
+        if part_:
+            part_ = 200000 / part_
+            for t_ in rtags:
+                dist_[t_] = dist_.get(t_, 0) + part_
+
+        if len(dist_) == 0:
+            yield token, None
+            continue
+
+        if 'Z' in dist_:
+            # damp the pronouns
+            rest = sum(dist_.values()) - dist_['Z']
+            prob = dist_['Z'] / ((rest + dist_['Z']) * 10)  # 0.1 damping
+            dist_['Z'] = prob * rest / (1 - prob)
+
+        dist_ = dist_.items()
+        dist_.sort(key = key1, reverse = True)
+        yield token, dist_[0][0]

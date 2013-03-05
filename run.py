@@ -4,12 +4,14 @@ from os.path import dirname, abspath
 import codecs
 from hashlib import md5
 from struct import pack, unpack, calcsize
+from collections import defaultdict
 
 import json
 from zlib import compress, decompress
 from nlmk import text
 from nlmk import tokenizer
 from nlmk import ngramgen as ngramgenmod
+from nlmk import tagger
 
 _CACHE = abspath(dirname(__file__)) + '/.cache'
 
@@ -160,8 +162,55 @@ def contexts(source, word):
     ctx = sorted(l + ' ' + r for l, r in text.contexts(word, vocab))
     for c in ctx: print c.encode('utf-8')
 
+def _multi_iter_tokenize(sources):
+    for source in sources:
+        with codecs.open(source, 'r', 'utf-8') as f:
+            itokens = tokenizer.iter_tokenize(f)
+            for t in itokens:
+                yield t
+
+
+def build_tagger(tagger_name, *sources):
+    sig = '%s/%s.tagger' % (_CACHE, tagger_name)
+    ftager = open(sig, 'wb')
+    itokens = _multi_iter_tokenize(sources)
+    tagger_ = tagger.build_tagger(itokens)
+
+    l, m, r = tagger_['L'], tagger_['M'], tagger_['R']
+
+    list_tagger = [dict(('_'.join(key), values)
+                         for key, values in T.iteritems())
+                   for T in l, m, r]
+    tagger_ = compress(json.dumps(list_tagger))
+    ftager.write(tagger_)
+    ftager.close()
+
+def _load_tagger(tagger_name):
+    sig = '%s/%s.tagger' % (_CACHE, tagger_name)
+    with open(sig, 'rb') as f:
+        list_tagger = json.loads(decompress(f.read()))
+    tagger = {'L':defaultdict(tuple), 'M': defaultdict(tuple), 'R':defaultdict(tuple)}
+    index_ = iter(['L', 'M', 'R'])
+    for T in list_tagger:
+        t_key = next(index_)
+        for key, values in T.iteritems():
+            key = tuple(str(key).split('_'))
+            tagger[t_key][key] = tuple(map(str, values))
+
+    return tagger
+
+def tag(source, tagger_name):
+    tagger_ = _load_tagger(tagger_name)
+    fh = codecs.open(source, 'r', 'utf-8')
+    itokens = tokenizer.iter_tokenize(fh)
+    for token, tag in tagger.smart_tag(itokens, tagger_):
+        tmp = token.encode('utf-8')
+        if tag is not None:
+            tmp = tmp + ' {{%s}}' % tag
+        print tmp,
+
 _runners = {'ngramgen': ngramgen, 'sentences': sentences, 'concordance': concordance,
-            'contexts': contexts}
+            'contexts': contexts, 'build-tagger': build_tagger, 'tag': tag}
 
 def main():
     try:

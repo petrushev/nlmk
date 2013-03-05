@@ -121,3 +121,24 @@ def iter_tagged(tokens):
 
 """Function to return the base tag for a given tag"""
 base_tag = lambda tag: _base_tags.get(tag, tag)
+
+def build_tagger(tokens):
+    """Build tagger from basic analysis of a token stream"""
+    trigrams = iter_ngrams(tokens, 3)
+
+    tagger = {'L':defaultdict(list), 'M':defaultdict(list), 'R':defaultdict(list)}
+
+    builder_skip_tags = set(('NU', 'PU'))
+
+    for l, m, r in trigrams:
+        lt, mt, rt = map(tag, (l, m, r))
+        if reduce(or_, [tag_ is None for tag_ in (lt, mt, rt)]): continue
+
+        if lt not in builder_skip_tags:
+            tagger['L'][(mt, rt)].append(lt)
+        if mt not in builder_skip_tags:
+            tagger['M'][(lt, rt)].append(mt)
+        if rt not in builder_skip_tags:
+            tagger['R'][(lt, mt)].append(rt)
+
+    return tagger

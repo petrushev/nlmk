@@ -48,8 +48,9 @@ def _cached_vocab(filepath):
             vocab_bin = f.read()
     except IOError:
         sent_idx = _cached_sentences_index(filepath)
-        with codecs.open(filepath, 'r', 'utf-8') as fh:
-            vocab = text.vocabulary(text.iter_tokens(text.iter_sentences(fh, sent_idx)))
+        with open(filepath, 'r') as fh:
+            lines = (line.decode('utf-8') for line in fh)
+            vocab = text.vocabulary(text.iter_tokens(text.iter_sentences(lines, sent_idx)))
         vocab_bin = compress(json.dumps(vocab))
         with open('%s/%s.vocab' % (_CACHE, sig), 'wb') as f:
             f.write(vocab_bin)

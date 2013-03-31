@@ -26,7 +26,6 @@ def sentence(tx, i, sent_idx):
 
 def iter_sentences(tx, sent_idx):
     """Iterates through sentences of a text previously segmented"""
-    tx.seek(0)
     buf = u''
     sent_iter = iter(sent_idx)
     end = sent_iter.next()
@@ -42,10 +41,7 @@ def iter_sentences(tx, sent_idx):
                 len_ = new_end - end
                 end = new_end
             except StopIteration: # all sentences yielded, finish off the text
-                buf = buf + tx.read()
                 yield buf.replace(u'\n', u' ').replace(u'\t', u' ').strip()
-
-
 
 def iter_tokens(sentences):
     """Returns iterator of triplets: token, sentence_id, token_id """

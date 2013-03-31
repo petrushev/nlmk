@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
 from sys import argv
 from os.path import dirname, abspath
-import codecs
 from hashlib import md5
 from struct import pack, unpack, calcsize
 from collections import defaultdict
-
 import json
 from zlib import compress, decompress
-from nlmk import text
-from nlmk import tokenizer
+
+from nlmk import text, tokenizer, tagger
 from nlmk import ngramgen as ngramgenmod
-from nlmk import tagger
 
 _CACHE = abspath(dirname(__file__)) + '/.cache'
 
@@ -64,9 +61,9 @@ def ngramgen(source, *cuttoff_info):
     """Generate n-grams with provided cuttoff"""
 
     try:
-        fh = codecs.open(source, 'r', 'utf-8')
+        fh = open(source, 'r')
     except Exception:
-        print 'File not found or invalid utf-8:', source
+        print 'File not found:', source
         return
 
     try:
@@ -82,7 +79,8 @@ def ngramgen(source, *cuttoff_info):
     sent_idx = _cached_sentences_index(source)
 
     fh.seek(0)
-    isents = text.iter_sentences(fh, sent_idx)
+    lines = (line.decode('utf-8') for line in fh)
+    isents = text.iter_sentences(lines, sent_idx)
 
     itokens = (t for t, s, tid in text.iter_tokens(isents))
     res = ngramgenmod.multi_ngram(itokens, len(cuttoff_info))
@@ -96,9 +94,9 @@ def ngramgen(source, *cuttoff_info):
 
 def sentences(source, slice_ = None):
     try:
-        fh = codecs.open(source, 'r', 'utf-8')
+        fh = open(source, 'r')
     except Exception:
-        print 'File not found or invalid utf-8:', source
+        print 'File not found:', source
         return
 
     sent_idx = _cached_sentences_index(source)
@@ -136,7 +134,7 @@ def sentences(source, slice_ = None):
 
 def concordance(source, word, window = 4):
     try:
-        fh = codecs.open(source, 'r', 'utf-8')
+        fh = open(source, 'r')
     except Exception:
         print 'File not found or invalid utf-8:', source
         return
@@ -144,14 +142,15 @@ def concordance(source, word, window = 4):
     word = word.decode('utf-8')
     window = int(window)
 
-    itokens = tokenizer.iter_tokenize(fh)
+    lines = (line.decode('utf-8') for line in fh)
+    itokens = tokenizer.iter_tokenize(lines)
     for window in text.concordance(word, itokens, window):
         print ' '.join(window).encode('utf-8')
     fh.close()
 
 def contexts(source, word):
     try:
-        fh = codecs.open(source, 'r', 'utf-8')
+        fh = open(source, 'r')
     except Exception:
         print 'File not found or invalid utf-8:', source
         return
@@ -165,8 +164,9 @@ def contexts(source, word):
 
 def _multi_iter_tokenize(sources):
     for source in sources:
-        with codecs.open(source, 'r', 'utf-8') as f:
-            itokens = tokenizer.iter_tokenize(f)
+        with open(source, 'r') as f:
+            lines = (line.decode('utf-8') for line in f)
+            itokens = tokenizer.iter_tokenize(lines)
             for t in itokens:
                 yield t
 
@@ -202,13 +202,15 @@ def _load_tagger(tagger_name):
 
 def tag(source, tagger_name):
     tagger_ = _load_tagger(tagger_name)
-    fh = codecs.open(source, 'r', 'utf-8')
-    itokens = tokenizer.iter_tokenize(fh)
+    fh = open(source, 'r')
+    lines = (line.decode('utf-8') for line in fh)
+    itokens = tokenizer.iter_tokenize(lines)
     for token, tag in tagger.smart_tag(itokens, tagger_):
         tmp = token.encode('utf-8')
         if tag is not None:
             tmp = tmp + ' {{%s}}' % tag
         print tmp,
+    fh.close()
 
 _runners = {'ngramgen': ngramgen, 'sentences': sentences, 'concordance': concordance,
             'contexts': contexts, 'build-tagger': build_tagger, 'tag': tag}

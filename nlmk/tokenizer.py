@@ -56,10 +56,22 @@ def tokenize(feed, include_junk = True, echo_junk = False):
 
     return tokens
 
+def _tokenize(feed):
+    start = 0
+    for t, s, e in all_.scanString(feed):
+        if s != 0:
+            junk = feed[start:s].strip()
+            if junk != "": yield junk
+        if t[0]: yield t[0]
+        start = e
+
+    junk = feed[start:].strip()
+    if junk != "": yield junk
+
 def iter_tokenize(tx, include_junk = True, echo_junk = False):
     """Iterate through tokens using filelike object as feed (memory efficient)"""
     for line in tx:
-        for token in tokenize(line, include_junk, echo_junk):
+        for token in _tokenize(line):
             yield token
 
 def sentences_index(feed):
@@ -69,4 +81,3 @@ def sentences_index(feed):
     parser = start + end
     parser = parser.parseWithTabs()
     return [item[1] + 1 for item in parser.scanString(feed)]
-

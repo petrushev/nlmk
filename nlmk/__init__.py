@@ -9,6 +9,7 @@ def ra_unicode_read(fh, start, end):
 
     buf = u""
     iter_fh = iter(fh)
+    iter_fh = (line.decode('utf-8') for line in iter_fh)
     for line in iter_fh:  # read file line-by-line...
         line_len = len(line)
         if line_len < start:        # .. recalibrate start/end ...

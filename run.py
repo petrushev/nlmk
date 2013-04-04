@@ -93,6 +93,7 @@ def ngramgen(source, *cuttoff_info):
             print (' '.join(tpl) + ' ' + unicode(v)).encode('utf-8')
 
 def sentences(source, slice_ = None):
+    """Fetch one or more sentences from a document"""
     try:
         fh = open(source, 'r')
     except Exception:
@@ -133,6 +134,7 @@ def sentences(source, slice_ = None):
     fh.close()
 
 def concordance(source, word, window = 4):
+    """Concordance, finds word in a document along with context"""
     try:
         fh = open(source, 'r')
     except Exception:
@@ -149,6 +151,7 @@ def concordance(source, word, window = 4):
     fh.close()
 
 def contexts(source, word):
+    """Finds all contexts of a word"""
     try:
         fh = open(source, 'r')
     except Exception:
@@ -172,6 +175,7 @@ def _multi_iter_tokenize(sources):
 
 
 def build_tagger(tagger_name, *sources):
+    """Build a tagger given one or more documents"""
     sig = '%s/%s.tagger' % (_CACHE, tagger_name)
     ftager = open(sig, 'wb')
     itokens = _multi_iter_tokenize(sources)
@@ -201,6 +205,7 @@ def _load_tagger(tagger_name):
     return tagger
 
 def tag(source, tagger_name):
+    """Tag a document using a pre-built tagger"""
     tagger_ = _load_tagger(tagger_name)
     fh = open(source, 'r')
     lines = (line.decode('utf-8') for line in fh)

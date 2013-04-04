@@ -7,7 +7,7 @@ from collections import defaultdict
 import json
 from zlib import compress, decompress
 
-from nlmk import text, tokenizer, tagger
+from nlmk import text, tokenizer, tagger, corpus
 from nlmk import ngramgen as ngramgenmod
 
 _CACHE = abspath(dirname(__file__)) + '/.cache'
@@ -212,8 +212,20 @@ def tag(source, tagger_name):
         print tmp,
     fh.close()
 
+def tf(source):
+    """Term frequency distribution"""
+    fh = open(source, 'r')
+    lines = (line.decode('utf-8') for line in fh)
+    itokens = tokenizer.iter_tokenize(lines)
+    itokens = (token.lower() for token in itokens if token[0].isalpha())
+    distribution = corpus.tf_distribution(itokens).items()
+    distribution.sort(key = lambda item: -item[1])
+    for token, val in distribution:
+        print token.encode('utf-8'), '%.4f' % val
+
 _runners = {'ngramgen': ngramgen, 'sentences': sentences, 'concordance': concordance,
-            'contexts': contexts, 'build-tagger': build_tagger, 'tag': tag}
+            'contexts': contexts, 'build-tagger': build_tagger, 'tag': tag,
+            'tf': tf}
 
 def main():
     try:

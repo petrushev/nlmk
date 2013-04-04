@@ -46,6 +46,24 @@ Example:
     python run.py ngramgen corpus/racin.txt 10 2 1
 
 This will generate unigrams, bigrams and trigrams:
+
     - the unigrams (words) show up at least 10 times
     - the bigrams occur at least 2 times
     - the trigrams occur at least 1 time (all trigrams)
+
+POS-tagers
+----------
+
+Use the ``nlmk.tagger`` module, or call it through the ``run.py`` caller.
+
+Example:
+
+First you need to build a tagger using one or more documents. This will build a tagger called ``sociology``:
+::
+
+    python run.py build-tagger sociology corpus/obezvrednuvanje.na.trudot.txt corpus/rabotni.sporovi.txt
+
+This tagger can be used to tag some other documents:
+::
+
+    python run.py tag corpus/racin.txt sociology

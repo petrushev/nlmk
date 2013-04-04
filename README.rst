@@ -67,3 +67,15 @@ This tagger can be used to tag some other documents:
 ::
 
     python run.py tag corpus/racin.txt sociology
+
+Term frequency
+--------------
+
+Use ``nlmk.corpus`` module, or call it through the ``run.py`` caller.
+
+Example:
+
+This will give the term frequency distribution:
+::
+
+    python run.py tf corpus/racin.txt

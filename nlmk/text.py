@@ -97,15 +97,8 @@ def collocations(bigrams, filter = default_collocation_filter):
 def frequency(tokens, no_stopwords = True):
     """Return dictionary of frequencies per token,
     exclude stopwords by default"""
-    # TODO : -- very inefficient -- - rework with if/else (ugly, but)
-    def filter_(token):
-        expr = (len(token) > 1)
-        if no_stopwords:
-            expr = (expr and (token.lower() not in stopwords))
-        return expr
-
     tokens = sorted(t.lower() for t in tokens \
-                    if filter_(t))
+                    if len(token) > 1) and (not no_stopwords or (token.lower() not in stopwords)))
     return dict((token, len(tuple(items))) \
                  for token, items in groupby(tokens))
 

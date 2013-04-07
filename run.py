@@ -138,7 +138,7 @@ def concordance(source, word, window = 4):
     try:
         fh = open(source, 'r')
     except Exception:
-        print 'File not found or invalid utf-8:', source
+        print 'File not found:', source
         return
 
     word = word.decode('utf-8')
@@ -155,7 +155,7 @@ def contexts(source, word):
     try:
         fh = open(source, 'r')
     except Exception:
-        print 'File not found or invalid utf-8:', source
+        print 'File not found:', source
         return
 
     fh.close()

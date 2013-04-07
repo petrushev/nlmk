@@ -7,7 +7,8 @@ Requirements
 ------------
 
 ``nlmk`` requires the following third party libraries:
- - ``pyparsing-1.5.7``
+
+    - ``pyparsing-1.5.7``
 
 ``nlmk`` can also run with ``pypy``. Please be careful to install the correct ``pyparsing`` version.
 

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from pyparsing import Word, Literal, originalTextFor, \
                       OneOrMore, nums, Or, Combine, alphas, \
                       oneOf
@@ -76,8 +75,10 @@ def iter_tokenize(tx, include_junk = True, echo_junk = False):
 
 def sentences_index(feed):
     """Returns list of sentence beginings starting from second sentence"""
-    start = oneOf(list(u'.?!…')) | Literal('...')
+    #start = oneOf(list(u'.?!…')) | Literal('...')
+    start = Or(map(Literal, list(u'.?!…') + ['...', u'.”', u'”.', u'”.', u'".' ]))
+
     end = oneOf(list(u'\n' + u'-—"„“”' + alpha_cap_uni))
     parser = start + end
     parser = parser.parseWithTabs()
-    return [item[1] + 1 for item in parser.scanString(feed)]
+    return [item[1] + len(item[0]) for item in parser.scanString(feed)]

@@ -15,7 +15,10 @@ def sentence(tx, i, sent_idx):
                           % (len(sent_idx) + 1, i + 1)
 
     if i == 0:
-        sent = ra_unicode_read(tx, 0, sent_idx[0])
+        if len(sent_idx) > 0:
+            sent = ra_unicode_read(tx, 0, sent_idx[0])
+        else:
+            sent = ra_unicode_read(tx, 0, None)
     elif i == len(sent_idx):
         sent = ra_unicode_read(tx, sent_idx[-1], None)
     else:
